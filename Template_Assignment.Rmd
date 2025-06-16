@@ -1,6 +1,6 @@
 ---
 title: "Template"
-author: "Studentnames and studentnumbers here"
+author: "Adham Artimi (2676721), "
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
