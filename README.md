@@ -1,5 +1,3 @@
-This is the working file!!!
-
 **DO NOT WORK DIRECTLY IN THE 'MAIN' BRANCH**
 
 The desirable way of work is as follow:<br />
