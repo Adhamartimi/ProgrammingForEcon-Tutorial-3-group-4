@@ -1,6 +1,6 @@
 ---
 title: "Template"
-author: "Adham Artimi (2676721), "
+author: "Adham Artimi (2676721), Student 2 (0123456), Student 3 (0123456), Student 4 (0123456), Student 5 (0123456), Student 6 (0123456), Student 7 (0123456) "
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
