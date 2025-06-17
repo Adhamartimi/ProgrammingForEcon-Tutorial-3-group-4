@@ -1,6 +1,6 @@
 ---
 title: "Template"
-author: "Adham Artimi (2676721), Student 2 (0123456), Student 3 (0123456), Student 4 (0123456), Student 5 (0123456), Student 6 (0123456), Student 7 (0123456) "
+author: "Adham Artimi (2676721), Daniel Mohammadpour (2749227), Nikki Borgen (2853132), Jip Allessie (2786323), Student 5 (0123456), Student 6 (0123456), Student 7 (0123456) "
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -41,35 +41,94 @@ Include the following:
 
 Preferably from a URL, but if not, make sure to download the data and store it in a shared location that you can load the data in from. Do not store the data in a folder you include in the Github repository!
 
-```{r loading_data}
-dataset <- midwest
-```
 
-midwest is an example dataset included in the tidyverse package
+```r
+```{r loading_data, message=FALSE, warning=FALSE}
+# Load necessary package
+library(tidyverse)
+
+# Set the working directory (adjust if needed for your system)
+setwd("~/Desktop/progming")
+
+# Load the two datasets from local CSV files
+rondkomen <- read.csv("MOEITE_MET_RONDKOMEN_BUURTEN_AMSTERDAM.csv")
+klachten <- read.csv("PSYCHISCHE_KLACHTEN_BUURTEN_AMSTERDAM.csv")
+
+# Check the structure of the raw datasets (optional for debugging)
+str(rondkomen)
+str(klachten)
+
+# Clean 'rondkomen' dataset:
+# - Remove rows with missing names or aggregate national/city rows
+rondkomen_clean <- rondkomen %>%
+  filter(!is.na(GEBIED_NAAM)) %>%
+  filter(!GEBIED_NAAM %in% c("Nederland", "Gemeente: Amsterdam"))
+
+# Clean 'klachten' dataset similarly
+klachten_clean <- klachten %>%
+  filter(!is.na(GEBIED_NAAM)) %>%
+  filter(!GEBIED_NAAM %in% c("Nederland", "Gemeente: Amsterdam"))
+
+# Rename columns in both datasets for easier reference
+rondkomen_clean <- rondkomen_clean %>%
+  rename(
+    buurt = GEBIED_NAAM,
+    rondkomen_18plus = X18_en_ouder,
+    rondkomen_18_65 = X18_tot_65,
+    rondkomen_65plus = X65_en_ouder
+  )
+
+klachten_clean <- klachten_clean %>%
+  rename(
+    buurt = GEBIED_NAAM,
+    klachten_18plus = X18_en_ouder,
+    klachten_18_65 = X18_tot_65,
+    klachten_65plus = X65_en_ouder
+  )
+
+# Merge the two datasets by neighborhood name (buurt)
+merged_data <- left_join(rondkomen_clean, klachten_clean, by = "buurt")
+
+#midwest is an example dataset included in the tidyverse package
 
 ## 2.2 Provide a short summary of the dataset(s)
 
-```{r}
-head(dataset)
+# Display the first few rows of the merged dataset
+head(merged_data) 
+
+#We use two datasets obtained from the public platform Buurtatlas, which provides local health and wellbeing statistics in the Netherlands. The indicators we selected are:
+
+    #Dataset 1: Moeite met Rondkomen (Difficulty Making Ends Meet) URL https://buurtatlas.vzinfo.nl/#moeite_met_rondkomen
+
+    #Dataset 2: Psychische Klachten (Psychological Complaints) URL https://buurtatlas.vzinfo.nl/#psychische_klachten
+
+#Each dataset's structure is consistent:
+
+    #GEBIED_NAAM: Name of the neighborhood (e.g., "Bos en Lommer", "IJburg West")
+
+    #X18_en_ouder: Percentage of individuals aged 18 and over reporting the issue
+
+    #X18_tot_65: Percentage of individuals aged 18 to 65
+
+    #X65_en_ouder: Percentage of individuals aged 65 and older
+
+#However, some rows represent aggregate totals such as "Nederland" or "Gemeente: Amsterdam" and were removed to focus on neighborhood-level variation. Additionally, some values are missing (NA), likely due to data protection or insufficient sample sizes in smaller areas.
+
+#After cleaning and renaming columns, the datasets were merged by GEBIED_NAAM (renamed to buurt). This resulted in a single dataframe, merged_data, which allows direct comparison of financial difficulty and mental health complaints across Amsterdam neighborhoods.
+
 ```
-
-In this case we see 28 variables, but we miss some information on what units they are in. We also don't know anything about the year/moment in which this data has been captured.
-
-``` r
-inline_code = TRUE
-```
-
-These are things that are usually included in the metadata of the dataset. For your project, you need to provide us with the information from your metadata that we need to understand your dataset of choice.
-
 ## 2.3 Describe the type of variables included
 
-Think of things like:
+The variables in our dataset represent both **health-related** and **socioeconomic** indicators:
 
--   Do the variables contain health information or SES information?
+- The *Moeite met Rondkomen* dataset captures **socioeconomic status (SES)** by indicating the percentage of people who experience financial difficulty.
+- The *Psychische Klachten* dataset captures **mental health status** through the percentage of people who report psychological complaints.
 
--   Have they been measured by interviewing individuals or is the data coming from administrative sources?
+All variables are expressed as **percentages (%)** of individuals within defined age groups (`18+`, `18–65`, `65+`) at the neighborhood level.
 
-*For the sake of this example, I will continue with the assignment...*
+According to the metadata provided on https://buurtatlas.vzinfo.nl, the data is collected via **national surveys** and **modeled estimates** at the municipal and neighborhood levels. This suggests a combination of self-reported survey results and statistical estimation techniques, rather than purely administrative records.
+
+These indicators allow us to examine the intersection between financial stress and mental health across different neighborhoods in Amsterdam.
 
 # Part 3 - Quantifying
 
@@ -156,3 +215,4 @@ Provide the link to your PUBLIC repository here: ...
 ## 5.2 Reference list
 
 Use APA referencing throughout your document.
+
