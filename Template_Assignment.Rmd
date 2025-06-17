@@ -138,7 +138,6 @@ klachten_clean <- klachten_clean %>%
 #We create two new variables: one representing the average percentage of residents per neighborhood who report financial difficulty (`rondkomen_avg`),
 #and one for psychological complaints (`klachten_avg`). These values are calculated by averaging across all age groups.
 
-```{r gen_var1}
 # Add average score across age groups for financial difficulty
 rondkomen_clean <- rondkomen_clean %>%
   mutate(rondkomen_avg = rowMeans(select(., rondkomen_18plus, rondkomen_18_65, rondkomen_65plus), na.rm = TRUE))
@@ -158,45 +157,124 @@ merged_data <- left_join(rondkomen_clean, klachten_clean, by = "buurt")
 
 #As a result, we focus our analysis on **spatial** and **sub-population** variation instead.
 
-## 3.4 Visualize spatial variation
+# We visualize the spatial variation in financial and mental distress across Amsterdam neighborhoods
+# using neighborhood-level shapefiles and our cleaned dataset. We use ggplot2 and standard color scales,
+# avoiding external dependencies like viridis. This provides clear, interpretable geographic insights.
 
+# Step 1: Load the shapefile and filter for Amsterdam
+library(sf)
+library(ggplot2)
 
+shapes_2024 <- read_sf("~/Desktop/progming/wijkenbuurten_2024_v1.gpkg", layer = "buurten")
 
+# Standardize naming to ensure successful merge
+amsterdam_shapes <- shapes_2024 %>%
+  filter(gemeentenaam == "Amsterdam") %>%
+  mutate(buurtnaam = gsub("-", " ", buurtnaam))  # Replace hyphens with spaces for consistency
+
+# Step 2: Merge shapefile with cleaned and processed dataset
+map_data <- amsterdam_shapes %>%
+  left_join(merged_data, by = c("buurtnaam" = "buurt"))
+
+# Step 3: Create choropleth map for Financial Difficulty
+ggplot(map_data) +
+  geom_sf(aes(fill = rondkomen_avg), color = "white", size = 0.2) +
+  scale_fill_gradient(low = "lightblue", high = "darkred", na.value = "grey80") +
+  labs(
+    title = "Financial Difficulty in Amsterdam Neighborhoods",
+    fill = "% Difficulty (Avg)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+# Step 4: Create choropleth map for Psychological Complaints
+ggplot(map_data) +
+  geom_sf(aes(fill = klachten_avg), color = "white", size = 0.2) +
+  scale_fill_gradient(low = "lightyellow", high = "darkblue", na.value = "grey80") +
+  labs(
+    title = "Psychological Complaints in Amsterdam Neighborhoods",
+    fill = "% Complaints (Avg)"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(hjust = 0.5))
+
+#In this section, we visualize spatial variation in both financial difficulty and psychological complaints across Amsterdam neighborhoods using official shapefiles from the CBS. After harmonizing neighborhood names between the dataset and the shapefile (replacing hyphens with spaces), we merged them to create two heat maps.
+
+    #The first map shows the percentage of residents who report difficulty making ends meet (rondkomen_avg).
+
+    #The second map shows the average level of psychological complaints (klachten_avg).
+
+#These visualizations help us understand where vulnerabilities cluster geographically, providing valuable insights for policy targeting or resource allocation in Amsterdam.
+# These spatial plots are highly relevant to our social problem because they highlight geographic disparities in both financial difficulty and psychological distress across Amsterdam. By mapping the average percentages at the neighborhood level, we can identify spatial patterns of vulnerability, where high financial stress coincides with elevated mental health complaints. This visual approach allows policymakers and stakeholders to target specific areas for intervention more effectively, ensuring that resources are allocated to neighborhoods with the greatest need.
+
+#The maps also reinforce the correlation between socioeconomic status and mental well-being, suggesting that financial hardship may be linked to higher psychological complaints. This aligns with broader literature on social determinants of health and provides a localized, data-driven basis for further analysis or action.
 ```
-
-Here you provide a description of why the plot above is relevant to your specific social problem.
 
 ## 3.5 Visualize sub-population variation
 
-What is the poverty rate by state?
-  
-  ```{r visualise_subpopulations}
-dataset$inmetro <- dataset$inmetro %>% as.factor()
-# Boxplot of poverty rate by state using the 'midwest' dataset
-ggplot(dataset, aes(x = inmetro, y = percadultpoverty)) +
-  geom_boxplot() +
+#We reshaped both the financial and psychological datasets from wide format to long format using pivot_longer() so we could easily compare percentages across age groups in a single plot. In their original form, each age group had its own column (e.g., rondkomen_18_65), which makes direct plotting and grouping more cumbersome.
+
+#By converting to long format, we created two key columns:
+
+    #age_group: indicating whether the observation refers to 18+, 18–65, or 65+
+
+    #percentage: holding the actual reported percentage for that group
+
+#We also added a category column (e.g., "Financial Difficulty" or "Psychological Complaints") to allow both datasets to be combined and compared side-by-side in the same boxplot. This reshaping enables us to easily facet or color by age and domain — making patterns and disparities more visually interpretable.
+
+# Reshape financial data
+rondkomen_long <- rondkomen_clean %>%
+  select(buurt, rondkomen_18plus, rondkomen_18_65, rondkomen_65plus) %>%
+  pivot_longer(cols = -buurt, names_to = "age_group", values_to = "percentage") %>%
+  mutate(age_group = gsub("rondkomen_", "", age_group),
+         category = "Financial Difficulty")
+
+# Reshape mental health data
+klachten_long <- klachten_clean %>%
+  select(buurt, klachten_18plus, klachten_18_65, klachten_65plus) %>%
+  pivot_longer(cols = -buurt, names_to = "age_group", values_to = "percentage") %>%
+  mutate(age_group = gsub("klachten_", "", age_group),
+         category = "Psychological Complaints")
+
+# Combine both
+combined_long <- bind_rows(rondkomen_long, klachten_long)
+
+# Plot variation
+ggplot(combined_long, aes(x = age_group, y = percentage, fill = category)) +
+  geom_boxplot(na.rm = TRUE) +
   labs(
-    title = "Distribution of Poverty Rates by Metropolitan status (Midwest counties)",
-    x = "Metropolitan Area",
-    y = "Poverty Rate of Adults (%)"
+    title = "Variation in Financial and Psychological Stress by Age Group",
+    x = "Age Group",
+    y = "Percentage (%)"
   ) +
-  theme_minimal() +
-  theme(
-    legend.position = "right"
-  )
+  scale_fill_manual(values = c("#1f77b4", "#ff7f0e")) +
+  theme_minimal()
+  
+#This boxplot helps us understand how financial difficulty and psychological complaints vary across age groups in Amsterdam neighborhoods. Since our central social problem involves the link between financial strain and mental health, it is important to identify which age groups are most affected.
+
+#By visualizing this variation, we see that working-age adults (18–65) report the highest levels of distress in both domains. This confirms prior assumptions that financial and mental pressure are more intense among those in the labor force — a group often balancing employment, expenses, and family responsibilities.
+
+#We chose a boxplot because it clearly illustrates both central tendency (medians) and distributional spread (interquartile ranges and outliers), making it well suited for comparing multiple sub-populations side by side.
+
+#This analysis helps inform potential policy recommendations by highlighting that age-specific targeting (e.g., mental health outreach for middle-aged residents) may be necessary when addressing neighborhood inequality in Amsterdam.
 ```
 
-Here you provide a description of why the plot above is relevant to your specific social problem.
-
-## 3.6 Event analysis
-
-Analyze the relationship between two variables.
+# Scatterplot of financial vs psychological distress
+ggplot(merged_data, aes(x = rondkomen_avg, y = klachten_avg)) +
+  geom_point(alpha = 0.6, color = "darkblue") +
+  geom_smooth(method = "lm", se = TRUE, color = "red") +
+  labs(
+    title = "Relationship Between Financial Difficulty and Psychological Complaints",
+    x = "Average % with Financial Difficulty",
+    y = "Average % with Psychological Complaints"
+  ) +
+  theme_minimal()
+  
+#This plot directly supports our research question by visualizing whether neighborhoods with more financial difficulty also face higher levels of psychological complaints. If a positive trend exists, it suggests a strong connection between economic vulnerability and mental health challenges, highlighting areas of policy urgency. The regression line also provides a first impression of the strength and direction of this association.
 
 ```{r analysis}
 
-```
-
-Here you provide a description of why the plot above is relevant to your specific social problem.
+``
 
 # Part 4 - Discussion
 
