@@ -1,13 +1,13 @@
 ---
   title: "Money Problems and Mental Health"
-author: "Adham Artimi (2676721), Daniel Mohammadpour (2749227), Nikki Borgen (2853132), Jip Allessie (2786323), Student 5 (0123456), Student 6 (0123456), Student 7 (0123456) "
+author: "Adham Artimi (2676721), Daniel Mohammadpour (2749227), Nikki Borgen (2853132), Jip Allessie (2786323), Student 5 (0123456), Student 6 (0123456), Student 7 (0123456)"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
   
   # Set-up your environment
   
-  ```{r package_install, include=FALSE}
+ ```{r package_install, include=FALSE}
 install.packages("tidyverse")
 install.packages("yaml")
 install.packages("rmarkdown")
@@ -25,7 +25,7 @@ Adham Artimi (2676721), Daniel Mohammadpour (2749227), Nikki Borgen (2853132), J
 
 Tutorial 3
 
-Include your tutorial lecturer's name
+Chantal Schouwenaar
 
 # Part 1 - Identify a Social Problem
 
@@ -43,63 +43,61 @@ Include the following:
 
 ## 2.1 Load in the data
 
-The data for this project was downloaded from the [RIVM Statline](https://statline.rivm.nl), a public health platform that provides neighborhood-level statistics across the Netherlands.
+The data for this project was downloaded from the [RIVM StatLine](https://statline.rivm.nl), a public health platform that provides neighborhood-level statistics across the Netherlands.
 
 We use two sets of data, zooming in specifically on the city of Amsterdam:
-  - **Moeite met rondkomen**  
-  - **Hoog risico op angst of depressie**
+  - **Moeite met rondkomen (Trouble making ends meet)**  
+  - **Hoog risico op angst of depressie (High risk of anxiety or depression)**
   
-Additionally, we use a combined dataset that includes both the “moeite met rondkomen” (difficulty making ends meet) and “Hoog risico op angst of depressie” (High risk of anxiety or depression) variables. This combined dataset was exported for four reference years (2012, 2016, 2020, and 2022) and split into three age categories: 18 years and older, 18 to 65 years, and 65 years and older. This results in a total of 12 data files. All files were manually downloaded and loaded locally from the shared group folder, in line with the assignment instructions.
+Additionally, we use a combined dataset that includes both the 'moeite met rondkomen' (difficulty making ends meet) and 'Hoog risico op angst of depressie' (High risk of anxiety or depression) variables. This combined dataset was exported for four reference years (2012, 2016, 2020, and 2022) and split into three age categories: 18 years and older, 18 to 65 years, and 65 years and older. This results in a total of 12 data files. All files were manually downloaded and loaded locally from the shared group folder, in line with the assignment instructions.
 
-```{r loading_data, message=FALSE, warning=FALSE}
-# Load required package
-library(tidyverse)
+```{r loading_data}
 
 # Set working directory (adjust this path if needed for your setup)
-setwd("~/Desktop/progming")
+setwd("")
+#############Nog aanpassen -> Krijg het niet aan de praat. #Adham
 
 # Load the two datasets
-rondkomen <- read.csv("MOEITE_MET_RONDKOMEN_BUURTEN_AMSTERDAM.csv")
-klachten <- read.csv("PSYCHISCHE_KLACHTEN_BUURTEN_AMSTERDAM.csv")
-
-# Show the structure of both datasets
-str(rondkomen)
-str(klachten)
-
-dim(rondkomen)
-dim(klachten)
-
-colnames(rondkomen)
-colnames(klachten)
-
-#We will clean and merge the datasets in Section 3.1 to enable joint analysis
+rondkomen2012_18_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2012_18_of_ouder.csv")
+rondkomen2016_18_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2016_18_of_ouder.csv")
+rondkomen2020_18_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2020_18_of_ouder.csv")
+rondkomen2022_18_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2022_18_of_ouder.csv")
+rondkomen2012_18_tot_65 <- read.csv("Gezondheid_per_wijk_en_buurt__2012_18_tot_65.csv")
+rondkomen2016_18_tot_65 <- read.csv("Gezondheid_per_wijk_en_buurt__2016_18_tot_65.csv")
+rondkomen2020_18_tot_65 <- read.csv("Gezondheid_per_wijk_en_buurt__2020_18_tot_65.csv")
+rondkomen2022_18_tot_65 <- read.csv("Gezondheid_per_wijk_en_buurt__2022_18_tot_65.csv")
+rondkomen2012_65_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2012_65_of_ouder.csv")
+rondkomen2016_65_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2016_65_of_ouder.csv")
+rondkomen2020_65_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2020_65_of_ouder.csv")
+rondkomen2022_65_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2022_65_of_ouder.csv")
+```
 
 ## 2.2 Provide a short summary of the dataset(s)
 
-# Show first few rows of each raw dataset
-head(rondkomen)
-head(klachten)
-summary(rondkomen)
-summary(klachten)
+We use datasets from the RIVM StatLine (Rijksinstituut voor Volksgezondheid en Milieu), which provide neighborhood-level statistics related to health and socioeconomic well-being in the Netherlands. Since all 12 datasets we use are identical in the number of observations and variables—differing only by year & age group—we provide a short summary of one representative dataset.
 
-#We use two datasets from the Volksgezondheid en Zorg Buurtatlas, which provide neighborhood-level statistics related to health and socioeconomic well-being in the Netherlands.
+```{r summary dataset(s)}
+# Let's have a quick glance of the dataset using the glimpse function (via dplyr)
+glimpse(Gezondheid_per_wijk_en_buurt__2012_18_of_ouder)
 
-#Dataset 1: Moeite met Rondkomen (Difficulty Making Ends Meet)
+####Eventueel nog een of echt max max twee summary functions #Adham
 
-#Dataset 2: Psychische Klachten (Psychological Complaints)
 ```
+
+We will clean and merge the datasets in Section 3.1 to enable joint analysis
+
 ## 2.3 Describe the type of variables included
 
-#The variables in our dataset represent both **health-related** and **socioeconomic** indicators:
+The variables in our dataset represent both **health-related** and **socioeconomic** indicators:
   
-#- The *Moeite met Rondkomen* dataset captures **socioeconomic status (SES)** by indicating the percentage of people who experience financial difficulty.
-#- The *Psychische Klachten* dataset captures **mental health status** through the percentage of people who report psychological complaints.
+- The *Moeite met Rondkomen* dataset captures **socioeconomic status (SES)** by indicating the percentage of people who experience financial difficulty.
+- The *Psychische Klachten* dataset captures **mental health status** through the percentage of people who report psychological complaints.
 
-#All variables are expressed as **percentages (%)** of individuals within defined age groups (`18+`, `18–65`, `65+`) at the neighborhood level.
+All variables are expressed as **percentages (%)** of individuals within defined age groups (`18+`, `18–65`, `65+`) at the neighborhood level.
 
-#According to the metadata provided on https://buurtatlas.vzinfo.nl, the data is collected via **national surveys** and **modeled estimates** at the municipal and neighborhood levels. This suggests a combination of self-reported survey results and statistical estimation techniques, rather than purely administrative records.
+According to the metadata provided on https://buurtatlas.vzinfo.nl, the data is collected via **national surveys** and **modeled estimates** at the municipal and neighborhood levels. This suggests a combination of self-reported survey results and statistical estimation techniques, rather than purely administrative records.
 
-#These indicators allow us to examine the intersection between financial stress and mental health across different neighborhoods in Amsterdam.
+These indicators allow us to examine the intersection between financial stress and mental health across different neighborhoods in Amsterdam.
 
 # Part 3 - Quantifying
 
@@ -135,13 +133,14 @@ klachten_clean <- klachten_clean %>%
     klachten_18_65 = X18_tot_65,
     klachten_65plus = X65_en_ouder
   )
-
+```
 
 ## 3.2 Generate necessary variables
 
-#We create two new variables: one representing the average percentage of residents per neighborhood who report financial difficulty (`rondkomen_avg`),
-#and one for psychological complaints (`klachten_avg`). These values are calculated by averaging across all age groups.
+We create two new variables: one representing the average percentage of residents per neighborhood who report financial difficulty (`rondkomen_avg`),
+and one for psychological complaints (`klachten_avg`). These values are calculated by averaging across all age groups.
 
+```{r Generate necessary variables}
 # Add average score across age groups for financial difficulty
 rondkomen_clean <- rondkomen_clean %>%
   mutate(rondkomen_avg = rowMeans(select(., rondkomen_18plus, rondkomen_18_65, rondkomen_65plus), na.rm = TRUE))
@@ -152,17 +151,18 @@ klachten_clean <- klachten_clean %>%
 
 # Merge datasets by 'buurt'
 merged_data <- left_join(rondkomen_clean, klachten_clean, by = "buurt")
+```
 
 ## 3.3 Visualize temporal variation
 
-#The datasets used in this project represent a single cross-section in time and do not include observations from multiple years. Therefore, it is not possible to visualize temporal variation using this data.
+The datasets used in this project represent a single cross-section in time and do not include observations from multiple years. Therefore, it is not possible to visualize temporal variation using this data.
 
-#According to the metadata from [Buurtatlas](https://buurtatlas.vzinfo.nl), the figures are based on the most recent available survey year (likely 2023), but no time series information is included in the CSV files.
+According to the metadata from [Buurtatlas](https://buurtatlas.vzinfo.nl), the figures are based on the most recent available survey year (likely 2023), but no time series information is included in the CSV files.
 
-#As a result, we focus our analysis on **spatial** and **sub-population** variation instead.
+As a result, we focus our analysis on **spatial** and **sub-population** variation instead.
 
-# We visualize the spatial variation in financial and mental distress across Amsterdam neighborhoods
-# using neighborhood-level shapefiles and our cleaned dataset. We use ggplot2 and standard color scales,
+We visualize the spatial variation in financial and mental distress across Amsterdam neighborhoods
+using neighborhood-level shapefiles and our cleaned dataset. We use ggplot2 and standard color scales,
 # avoiding external dependencies like viridis. This provides clear, interpretable geographic insights.
 
 # Step 1: Load the shapefile and filter for Amsterdam
