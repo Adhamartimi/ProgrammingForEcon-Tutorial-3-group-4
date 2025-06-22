@@ -169,7 +169,7 @@ As a result, we focus our analysis on **spatial** and **sub-population** variati
 
 We visualize the spatial variation in financial and mental distress across Amsterdam neighborhoods
 using neighborhood-level shapefiles and our cleaned dataset. We use ggplot2 and standard color scales,
-# avoiding external dependencies like viridis. This provides clear, interpretable geographic insights.
+# avoiding external dependencies like viridis. This way we get clear, interpretable geographic insights.
 
 # Step 1: Load the shapefile and filter for Amsterdam
 library(sf)
@@ -215,9 +215,9 @@ ggplot(map_data) +
     #The second map shows the average level of psychological complaints (klachten_avg).
 
 #These visualizations help us understand where vulnerabilities cluster geographically, providing valuable insights for policy targeting or resource allocation in Amsterdam.
-# These spatial plots are highly relevant to our social problem because they highlight geographic disparities in both financial difficulty and psychological distress across Amsterdam. By mapping the average percentages at the neighborhood level, we can identify spatial patterns of vulnerability, where high financial stress coincides with elevated mental health complaints. This visual approach allows policymakers and stakeholders to target specific areas for intervention more effectively, ensuring that resources are allocated to neighborhoods with the greatest need.
+# These spatial plots are highly relevant to our social problem because they highlight geographic disparities in both financial difficulty and psychological distress across Amsterdam. By mapping the average percentages at the neighborhood level, we can identify spatial patterns of vulnerability, where high financial stress coincides with elevated mental health complaints. This visual approach allows policymakers and stakeholders to target specific areas for intervention more effectively, such that resources are allocated to neighborhoods with the greatest need.
 
-#The maps also reinforce the correlation between socioeconomic status and mental well-being, suggesting that financial hardship may be linked to higher psychological complaints. This aligns with broader literature on social determinants of health and provides a localized, data-driven basis for further analysis or action.
+#The maps also reinforce the correlation between socioeconomic status and mental well-being, which suggests that financial hardship may be linked to higher psychological complaints. This aligns with broader literature on social determinants of health and provides a localized, more data-driven basis for further analysis or action.
 ```
 
 ## 3.5 Visualize sub-population variation
@@ -287,6 +287,17 @@ ggplot(merged_data, aes(x = rondkomen_avg, y = klachten_avg)) +
 ``
 
 # Part 4 - Discussion
+
+##Our findings reveal a concerning pattern; areas with higher levels of financial difficulty tend to report elevated rates of psychological complaints. This aligns with the existing literature concerning the relationship between socioeconomic status and mental health. Financial insecurity can therefore be seen as a strong indicator for mental health risks (Marmot, 2005; Pickett& Wilkinson, 2001)
+
+##The choropleth maps provide a visual evidence for the spatial disparaties in financial hardship and psychological stress. Several neighbourhoods in Amsterdam, especially those located further from the city center or with historically lower average incomes, show higher levels in both variable consistently.
+
+##Sub-group analysis shows that working age aduls (18-65) consitently report the highest levels of both psychological complaints and financial stress. A conclusion could therefore be drawn that economic and mental health pressures are more severe for those in the labour force.
+
+##Finally, the scatterplot confirms the strong correlation between financial and psychological strains, following the linear regression line. This supports the idea that economic hardship is closely linked to mental health problems.
+
+##These findings align with the public health research and might indicate that addressing financial difficulties locally could be a more effective way to reduce mental health problems across the city.
+
 
 ## 4.1 Discuss your findings
 
