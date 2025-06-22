@@ -29,15 +29,17 @@ Chantal Schouwenaar
 
 # Part 1 - Identify a Social Problem
 
-Use APA referencing throughout your document. [Here's a link to some explanation.](https://www.mendeley.com/guides/apa-citation-guide/)
+The relationship between income and mental health represents a significant social issue with consequences for individuals, families, and communities. People facing financial difficulties are more likely to experience mental health problems, while mental health issues can in turn reduce a person’s ability to work or maintain income stability. This creates a reinforcing cycle of disadvantage (World Health Organization, 2025).
+
+Research has shown that individuals with lower incomes tend to suffer more from psychological stress, have less access to mental health services, and face living conditions that increase the risk of mental illness. Michael Marmot (2005) highlights how reduced control, limited resources, and chronic stress contribute to health inequalities among socioeconomically disadvantaged groups. Similarly, Pickett and Wilkinson (2001) found that mental health problems are more common in low-income communities due to factors like social isolation and resource scarcity.
+
+Although this connection is well documented at the national and international levels, it remains unclear how income and mental health interact within cities. In this project, we investigate the extent to which these patterns appear across neighborhoods in Amsterdam, using local statistics and basic data analysis in R.
 
 ## 1.1 Describe the Social Problem
 
-Include the following:
-  
-  -   Why is this relevant?
-  
-  -   ...
+This issue is relevant because it highlights how economic inequality can lead to unequal mental health outcomes within the same city. If poorer neighborhoods in Amsterdam consistently show higher levels of mental health problems, this may reflect deeper structural inequalities in the distribution of public health resources and economic opportunity. Understanding these local patterns allows policymakers to target interventions more effectively, especially in the areas most in need (Thomson et al., 2023).
+
+By analyzing neighborhood-level data from Amsterdam and applying simple coding techniques in RStudio, this project contributes to a better understanding of how income and mental health are related in an urban setting. Our findings may help support future decisions about healthcare access, social support, and economic policy.
 
 # Part 2 - Data Sourcing
 
@@ -80,13 +82,13 @@ We use datasets from the RIVM StatLine (Rijksinstituut voor Volksgezondheid en M
 # Let's have a quick glance of the dataset using the glimpse function (via dplyr)
 glimpse(Gezondheid_per_wijk_en_buurt__2012_18_of_ouder)
 
-####Eventueel nog een of echt max max twee summary functions #Adham
+####Eventueel nog een of max max twee summary functions #Adham
 
 ```
 
 We will clean and merge the datasets in Section 3.1 to enable joint analysis
 
-## 2.3 Describe the type of variables included
+## 2.3 Describe the type of variables included ###################NOG DOEN
 
 The variables in our dataset represent both **health-related** and **socioeconomic** indicators:
   
@@ -107,33 +109,37 @@ We cleaned each dataset by removing rows with missing area names or aggregate to
 
 ###Remove missing and aggregate rows
 
-```{r data_cleaning_step1}
-# Filter out rows without specific neighborhoods
-rondkomen_clean <- rondkomen %>%
-  filter(!is.na(GEBIED_NAAM)) %>%
-  filter(!GEBIED_NAAM %in% c("Nederland", "Gemeente: Amsterdam"))
-
-klachten_clean <- klachten %>%
-  filter(!is.na(GEBIED_NAAM)) %>%
-  filter(!GEBIED_NAAM %in% c("Nederland", "Gemeente: Amsterdam"))
-
-# Rename for clarity
-rondkomen_clean <- rondkomen_clean %>%
-  rename(
-    buurt = GEBIED_NAAM,
-    rondkomen_18plus = X18_en_ouder,
-    rondkomen_18_65 = X18_tot_65,
-    rondkomen_65plus = X65_en_ouder
-  )
-
-klachten_clean <- klachten_clean %>%
-  rename(
-    buurt = GEBIED_NAAM,
-    klachten_18plus = X18_en_ouder,
-    klachten_18_65 = X18_tot_65,
-    klachten_65plus = X65_en_ouder
-  )
+```{data_cleaning_step1: merge all the separate datasets}
+amsterdam_gezondheid_merged <- rbind(Gezondheid_per_wijk_en_buurt__2012_18_of_ouder, Gezondheid_per_wijk_en_buurt__2012_18_tot_65, Gezondheid_per_wijk_en_buurt__2012_65_of_ouder, Gezondheid_per_wijk_en_buurt__2016_18_of_ouder, Gezondheid_per_wijk_en_buurt__2016_18_tot_65, Gezondheid_per_wijk_en_buurt__2016_65_of_ouder, Gezondheid_per_wijk_en_buurt__2020_18_of_ouder, Gezondheid_per_wijk_en_buurt__2020_18_tot_65, Gezondheid_per_wijk_en_buurt__2020_65_of_ouder, Gezondheid_per_wijk_en_buurt__2022_18_of_ouder, Gezondheid_per_wijk_en_buurt__2022_18_tot_65, Gezondheid_per_wijk_en_buurt__2022_65_of_ouder)
 ```
+
+```{r data_cleaning_step2: Filter out the unnecessary columns "Marges" & "Regioaanduiding.Gemeentenaam..naam."}
+
+amsterdam_gezondheid_clean <- amsterdam_gezondheid_merged |>
+  select(-Marges) |>
+  select(-Regioaanduiding.Gemeentenaam..naam.) 
+
+```
+
+```{r data_cleaning_step3: Filter out the rows with "Amsterdam"}
+amsterdam_gezondheid <- amsterdam_gezondheid_clean |>
+  filter(Wijken.en.buurten != "Amsterdam")
+
+```
+
+```{r data_cleaning_step4: rename for clarity}
+
+amsterdam_gezondheid  <- amsterdam_gezondheid |>
+  rename(
+     Wijken.en.buurten = wijken_en_buurten,
+    Regioaanduiding.Soort.regio..omschrijving. = Type_regio,
+    Regioaanduiding.Codering..code. = regio_code,
+    Hoog.risico.op.angst.of.depressie.... = risico_depressie,
+    Moeite.met.rondkomen.... = moeite_met_rondkomen
+  )
+
+```
+
 
 ## 3.2 Generate necessary variables
 
