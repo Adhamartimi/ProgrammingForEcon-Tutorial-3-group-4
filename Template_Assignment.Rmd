@@ -1,18 +1,19 @@
 ---
-  title: "Money Problems and Mental Health"
-author: "Adham Artimi (2676721), Daniel Mohammadpour (2749227), Nikki Borgen (2853132), Jip Allessie (2786323), Student 5 (0123456), Student 6 (0123456), Student 7 (0123456)"
+title: "Money Problems and Mental Health"
+author: "Adham Artimi (2676721), Daniel Mohammadpour (2749227), Nikki Borgen (2853132), Jip Allessie (2786323), Florian Hololtcheff
+ (2790532), Raouf Dönmez (2870124), Adam Affara (2800635)"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
-  
   # Set-up your environment
   
- ```{r package_install, include=FALSE}
+```{r package_install, include=FALSE}
 install.packages("tidyverse")
 install.packages("yaml")
 install.packages("rmarkdown")
 install.packages("lubridate")
 install.packages("sf")
+install.packages("tinytex")
 ```
 
 ```{r packages}
@@ -22,15 +23,14 @@ require(yaml)
 require(lubridate)
 require(sf)
 require(tmap)
+library(tinytex)
 ```
 
 # Money Problems and Mental Health
 
 Adham Artimi (2676721), Daniel Mohammadpour (2749227), Nikki Borgen (2853132), Jip Allessie (2786323), Student 5 (0123456), Student 6 (0123456), Student 7 (0123456)
 
-Tutorial 3
-
-Chantal Schouwenaar
+Tutorial 3; Chantal Schouwenaar
 
 # Part 1 - Identify a Social Problem
 
@@ -53,30 +53,27 @@ By analyzing neighborhood-level data from Amsterdam and applying simple coding t
 The data for this project was downloaded from the [RIVM StatLine](https://statline.rivm.nl), a public health platform that provides neighborhood-level statistics across the Netherlands.
 
 We use two sets of data, zooming in specifically on the city of Amsterdam:
+
   - **Moeite met rondkomen (Trouble making ends meet)**  
   - **Hoog risico op angst of depressie (High risk of anxiety or depression)**
   
-Additionally, we use a combined dataset that includes both the 'moeite met rondkomen' (difficulty making ends meet) and 'Hoog risico op angst of depressie' (High risk of anxiety or depression) variables. This combined dataset was exported for four reference years (2012, 2016, 2020, and 2022) and split into three age categories: 18 years and older, 18 to 65 years, and 65 years and older. This results in a total of 12 data files. All files were manually downloaded and loaded locally from the shared group folder, in line with the assignment instructions.
+Additionally, we use a combined dataset that includes both the 'moeite met rondkomen' (difficulty making ends meet) and 'Hoog risico op angst of depressie' (High risk of anxiety or depression) variables. This combined dataset was exported for four reference years (2012, 2016, 2020, and 2022) and split into three age categories: 18 years and older, 18 to 65 years, and 65 years and older. This results in a total of 12 data files. All files were downloaded from the shared group folder, in line with the assignment instructions.
 
 ```{r loading_data}
 
-# Set working directory (adjust this path if needed for your setup)
-setwd("")
-#############Nog aanpassen -> Krijg het niet aan de praat. #Adham
-
-# Load the two datasets
-rondkomen2012_18_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2012_18_of_ouder.csv")
-rondkomen2016_18_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2016_18_of_ouder.csv")
-rondkomen2020_18_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2020_18_of_ouder.csv")
-rondkomen2022_18_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2022_18_of_ouder.csv")
-rondkomen2012_18_tot_65 <- read.csv2("Gezondheid_per_wijk_en_buurt__2012_18_tot_65.csv")
-rondkomen2016_18_tot_65 <- read.csv2("Gezondheid_per_wijk_en_buurt__2016_18_tot_65.csv")
-rondkomen2020_18_tot_65 <- read.csv2("Gezondheid_per_wijk_en_buurt__2020_18_tot_65.csv")
-rondkomen2022_18_tot_65 <- read.csv2("Gezondheid_per_wijk_en_buurt__2022_18_tot_65.csv")
-rondkomen2012_65_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2012_65_of_ouder.csv")
-rondkomen2016_65_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2016_65_of_ouder.csv")
-rondkomen2020_65_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2020_65_of_ouder.csv")
-rondkomen2022_65_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2022_65_of_ouder.csv")
+# Load the datasets
+Gezondheid_per_wijk_en_buurt__2012_18_of_ouder <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2012_18_of_ouder.csv")
+Gezondheid_per_wijk_en_buurt__2016_18_of_ouder <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2016_18_of_ouder.csv")
+Gezondheid_per_wijk_en_buurt__2020_18_of_ouder <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2020_18_of_ouder.csv")
+Gezondheid_per_wijk_en_buurt__2022_18_of_ouder <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2022_18_of_ouder.csv")
+Gezondheid_per_wijk_en_buurt__2012_18_tot_65 <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2012_18_tot_65.csv")
+Gezondheid_per_wijk_en_buurt__2016_18_tot_65 <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2016_18_tot_65.csv")
+Gezondheid_per_wijk_en_buurt__2020_18_tot_65 <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2020_18_tot_65.csv")
+Gezondheid_per_wijk_en_buurt__2022_18_tot_65 <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2022_18_tot_65.csv")
+Gezondheid_per_wijk_en_buurt__2012_65_of_ouder <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2012_65_of_ouder.csv")
+Gezondheid_per_wijk_en_buurt__2016_65_of_ouder <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2016_65_of_ouder.csv")
+Gezondheid_per_wijk_en_buurt__2020_65_of_ouder <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2020_65_of_ouder.csv")
+Gezondheid_per_wijk_en_buurt__2022_65_of_ouder <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2022_65_of_ouder.csv")
 ```
 
 ## 2.2 Provide a short summary of the dataset(s)
@@ -84,27 +81,35 @@ rondkomen2022_65_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2022_65_of
 We use datasets from the RIVM StatLine (Rijksinstituut voor Volksgezondheid en Milieu), which provide neighborhood-level statistics related to health and socioeconomic well-being in the Netherlands. Since all 12 datasets we use are identical in the number of observations and variables—differing only by year & age group—we provide a short summary of one representative dataset.
 
 ```{r summary dataset(s)}
-# Let's have a quick glance of the dataset using the glimpse function (via dplyr)
+# Let's have a quick glance of the dataset using the glimpse (via dplyr) & head function
 glimpse(Gezondheid_per_wijk_en_buurt__2012_18_of_ouder)
-
-####Eventueel nog een of max max twee summary functions #Adham
+head(Gezondheid_per_wijk_en_buurt__2012_18_of_ouder)
 
 ```
 
-We will clean and merge the datasets in Section 3.1 to enable joint analysis
+This dataset contains 579 rows and 9 variables. Each row represents a specific neighborhood or district, and the variables include the year of data collection (Perioden), age group (Leeftijd), and values like the percentage of people at high risk for anxiety or depression and the percentage of people reporting difficulty making ends meet. These indicators are relevant for our research question, as they help us explore whether there is a possible relationship between financial difficulty and mental health at the neighborhood level.
 
-## 2.3 Describe the type of variables included ###################NOG DOEN
+## 2.3 Describe the type of variables included The variables in our 
+dataset represent both health-related and socioeconomic indicators:
 
-The variables in our dataset represent both **health-related** and **socioeconomic** indicators:
-  
-- The *Moeite met Rondkomen* dataset captures **socioeconomic status (SES)** by indicating the percentage of people who experience financial difficulty.
-- The *Psychische Klachten* dataset captures **mental health status** through the percentage of people who report psychological complaints.
+- The **Moeite met Rondkomen** variable reflects socioeconomic stress, measured by the percentage of individuals who report difficulty making ends meet.
 
-All variables are expressed as **percentages (%)** of individuals within defined age groups (`18+`, `18–65`, `65+`) at the neighborhood level.
+- The **Hoog Risico op Angst of Depressie** variable reflects mental health vulnerability, measured by the percentage of individuals estimated to be at high risk for anxiety or depression.
 
-According to the metadata provided on https://buurtatlas.vzinfo.nl, the data is collected via **national surveys** and **modeled estimates** at the municipal and neighborhood levels. This suggests a combination of self-reported survey results and statistical estimation techniques, rather than purely administrative records.
+These two variables are the focus of our analysis, as they relate directly to our research question about the connection between financial strain and mental health.
 
-These indicators allow us to examine the intersection between financial stress and mental health across different neighborhoods in Amsterdam.
+All variables are expressed as percentages (%) of individuals within defined age groups (18+, 18–65, or 65+) at the neighborhood (wijk/buurt) level.
+
+In addition to the two main variables, the dataset includes structural variables such as:
+
+- Wijken.en.buurten: the name of the neighborhood or district,
+- Perioden: the year of data collection,
+- Leeftijd: the age group,
+- RegioS: the statistical code for the neighborhood or district.
+
+According to the metadata available at RIVM Statline, the health-related indicators are based on national surveys combined with model-based estimates.
+
+These variables provide the structure and context necessary to filter and analyze the data by location, year, and age group. This helps us focus on relevant subpopulations and make meaningful comparisons across Amsterdam’s neighborhoods.
 
 # Part 3 - Quantifying
 
@@ -114,7 +119,8 @@ We cleaned each dataset by removing rows with missing area names or aggregate to
 
 ###Remove missing and aggregate rows
 
-```{data_cleaning_step1: merge all the separate datasets}
+```{r data_cleaning_step1: merge all the separate datasets}
+
 amsterdam_gezondheid_merged <- rbind(Gezondheid_per_wijk_en_buurt__2012_18_of_ouder, Gezondheid_per_wijk_en_buurt__2012_18_tot_65, Gezondheid_per_wijk_en_buurt__2012_65_of_ouder, Gezondheid_per_wijk_en_buurt__2016_18_of_ouder, Gezondheid_per_wijk_en_buurt__2016_18_tot_65, Gezondheid_per_wijk_en_buurt__2016_65_of_ouder, Gezondheid_per_wijk_en_buurt__2020_18_of_ouder, Gezondheid_per_wijk_en_buurt__2020_18_tot_65, Gezondheid_per_wijk_en_buurt__2020_65_of_ouder, Gezondheid_per_wijk_en_buurt__2022_18_of_ouder, Gezondheid_per_wijk_en_buurt__2022_18_tot_65, Gezondheid_per_wijk_en_buurt__2022_65_of_ouder)
 ```
 
@@ -179,11 +185,45 @@ Variable 2
 
 ```{r gen_var2}
 
+# First, calculate the percentiles (1–5) for "moeite met rondkomen" (financial stress). We assign each neighborhood to a quintile (1 = lowest stress, 5 = highest stress) and convert the numeric quintile into a descriptive label
+amsterdam_gezondheid <- amsterdam_gezondheid |>
+  mutate(
+    rondkomen_percentile = ntile(moeite_met_rondkomen, 5),
+    rondkomen_group = case_when(
+      rondkomen_percentile == 1 ~ "Very Low",
+      rondkomen_percentile == 2 ~ "Low",
+      rondkomen_percentile == 3 ~ "Moderate",
+      rondkomen_percentile == 4 ~ "High",
+      rondkomen_percentile == 5 ~ "Very High",
+      TRUE ~ NA_character_
+    )
+  )
+
+# We reepeat the same logic for "risico op depressie" (mental health complaints)
+amsterdam_gezondheid <- amsterdam_gezondheid %>%
+  mutate(
+    depressie_percentile = ntile(risico_depressie, 5),
+    depressie_group = case_when(
+      depressie_percentile == 1 ~ "Very Low",
+      depressie_percentile == 2 ~ "Low",
+      depressie_percentile == 3 ~ "Moderate",
+      depressie_percentile == 4 ~ "High",
+      depressie_percentile == 5 ~ "Very High",
+      TRUE ~ NA_character_
+    )
+  )
+
+# Optional: View new groupings for first few rows (remove in final report)
+amsterdam_gezondheid %>%
+  select(wijken_en_buurten, moeite_met_rondkomen, rondkomen_group,
+         risico_depressie, depressie_group) %>%
+  head(10)
+
 ```
 
 ## 3.3 Visualize temporal variation
 
-```{r visualise_map}
+```{r visualise_temporal_variation}
 
 ggplot(amsterdam_gezondheid, aes(x = Perioden)) +
   geom_line(aes(y = avg_risico_depressie, color = "Depressie"), size = 1) +
@@ -287,13 +327,29 @@ Here you provide a description of why the plot above is relevant to your specifi
 # Part 4 - Discussion
 
 ## 4.1 Discuss your findings
+Our findings reveal a concerning pattern; areas with higher levels of financial difficulty tend to report elevated rates of psychological complaints. This aligns with the existing literature concerning the relationship between socioeconomic status and mental health. Financial insecurity can therefore be seen as a strong indicator for mental health risks (Marmot, 2005; Pickett& Wilkinson, 2001)
+
+The choropleth maps provide a visual evidence for the spatial disparaties in financial hardship and psychological stress. Several neighbourhoods in Amsterdam, especially those located further from the city center or with historically lower average incomes, show higher levels in both variable consistently.
+
+Sub-group analysis shows that working age aduls (18-65) consitently report the highest levels of both psychological complaints and financial stress. A conclusion could therefore be drawn that economic and mental health pressures are more severe for those in the labour force.
+
+Finally, the event study confirms the strong correlation between financial and psychological strains, following the linear regression line. This supports the idea that economic hardship is closely linked to mental health problems.
+
+These findings align with the public health research and might indicate that addressing financial difficulties locally could be a more effective way to reduce mental health problems across the city.
 
 # Part 5 - Reproducibility
 
 ## 5.1 Github repository link
 
-Provide the link to your PUBLIC repository here: ...
+Provide the link to your PUBLIC repository here: https://github.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4
 
 ## 5.2 Reference list
 
-Use APA referencing throughout your document.
+Literature: 
+Igelström, E., Katikireddi, S. V., Leyland, A., McCartney G., Purba, A. K, Reeves, A., Shimonovich, M., Thomson, H., & Thomson, R. M. (2023). How do income changes impact on mental health and wellbeing for working-age adults? A systematic review and meta-analysis. https://pmc.ncbi.nlm.nih.gov/articles/PMC7614874/#R4 
+
+Marmot, M. (2005): Social determinants of health inequalities. The Lancet. https://www.sciencedirect.com/science/article/pii/S0140673605711466?via%3Dihub 
+
+World Health Organization. (2025). Mental Health. https://www.who.int/health-topics/mental-health#tab=tab_2
+
+Pickett, K. E., & Wilkinson, R. G. (2001). Income inequality and health: A casual review. Social Science & Medicine. https://www.sciencedirect.com/science/article/pii/S0277953614008399?via%3Dihub
