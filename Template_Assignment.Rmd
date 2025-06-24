@@ -12,6 +12,7 @@ install.packages("tidyverse")
 install.packages("yaml")
 install.packages("rmarkdown")
 install.packages("lubridate")
+install.packages("sf")
 ```
 
 ```{r packages}
@@ -19,6 +20,8 @@ require(tidyverse)
 require(rmarkdown)
 require(yaml)
 require(lubridate)
+require(sf)
+require(tmap)
 ```
 
 # Money Problems and Mental Health
@@ -62,18 +65,18 @@ setwd("")
 #############Nog aanpassen -> Krijg het niet aan de praat. #Adham
 
 # Load the two datasets
-rondkomen2012_18_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2012_18_of_ouder.csv")
-rondkomen2016_18_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2016_18_of_ouder.csv")
-rondkomen2020_18_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2020_18_of_ouder.csv")
-rondkomen2022_18_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2022_18_of_ouder.csv")
-rondkomen2012_18_tot_65 <- read.csv("Gezondheid_per_wijk_en_buurt__2012_18_tot_65.csv")
-rondkomen2016_18_tot_65 <- read.csv("Gezondheid_per_wijk_en_buurt__2016_18_tot_65.csv")
-rondkomen2020_18_tot_65 <- read.csv("Gezondheid_per_wijk_en_buurt__2020_18_tot_65.csv")
-rondkomen2022_18_tot_65 <- read.csv("Gezondheid_per_wijk_en_buurt__2022_18_tot_65.csv")
-rondkomen2012_65_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2012_65_of_ouder.csv")
-rondkomen2016_65_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2016_65_of_ouder.csv")
-rondkomen2020_65_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2020_65_of_ouder.csv")
-rondkomen2022_65_of_ouder <- read.csv("Gezondheid_per_wijk_en_buurt__2022_65_of_ouder.csv")
+rondkomen2012_18_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2012_18_of_ouder.csv")
+rondkomen2016_18_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2016_18_of_ouder.csv")
+rondkomen2020_18_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2020_18_of_ouder.csv")
+rondkomen2022_18_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2022_18_of_ouder.csv")
+rondkomen2012_18_tot_65 <- read.csv2("Gezondheid_per_wijk_en_buurt__2012_18_tot_65.csv")
+rondkomen2016_18_tot_65 <- read.csv2("Gezondheid_per_wijk_en_buurt__2016_18_tot_65.csv")
+rondkomen2020_18_tot_65 <- read.csv2("Gezondheid_per_wijk_en_buurt__2020_18_tot_65.csv")
+rondkomen2022_18_tot_65 <- read.csv2("Gezondheid_per_wijk_en_buurt__2022_18_tot_65.csv")
+rondkomen2012_65_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2012_65_of_ouder.csv")
+rondkomen2016_65_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2016_65_of_ouder.csv")
+rondkomen2020_65_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2020_65_of_ouder.csv")
+rondkomen2022_65_of_ouder <- read.csv2("Gezondheid_per_wijk_en_buurt__2022_65_of_ouder.csv")
 ```
 
 ## 2.2 Provide a short summary of the dataset(s)
@@ -195,6 +198,47 @@ ggplot(amsterdam_gezondheid, aes(x = Perioden)) +
 ## 3.4 Visualize spatial variation
 
 ```{r visualise_map}
+
+# Load spatial data
+geo_data <- st_read("C:/Users/AdhamArtimi/OneDrive/Bureaublad/wijkenbuurten_2022_v3.gpkg", layer = "buurten")
+
+# Filter for Amsterdam only
+amsterdam_map <- geo_data |>
+  filter(gemeentenaam == "Amsterdam") |>
+  select(buurtcode, buurtnaam)
+
+# Clean and filter your health dataset to match buurtcodes only. Here we remove extra spaces in column  'regio_code' and keep only rows that start with "BU"
+amsterdam_gezondheid <- amsterdam_gezondheid |>
+  mutate(regio_code = toupper(trimws(regio_code))) |>
+  filter(str_starts(regio_code, "BU"))
+
+# Merge spatial and health data by buurtcode
+amsterdam_merged <- left_join(amsterdam_map, amsterdam_gezondheid, by = c("buurtcode" = "regio_code"))
+
+# Filter to only 2022 data
+latest_year <- amsterdam_merged |>
+  filter(format(Perioden, "%Y") == "2022")
+
+# Use static mode for PDF
+tmap_mode("plot")
+
+# Map 1: Mental health complaints
+map1 <- tm_shape(latest_year) +
+  tm_polygons("risico_depressie",
+              palette = "PuBuGn",
+              title = "Psych Complaints (%)") +
+  tm_layout(legend.outside = TRUE)
+
+# Map 2: Financial difficulty
+map2 <- tm_shape(latest_year) +
+  tm_polygons("moeite_met_rondkomen",
+              palette = "YlOrRd",
+              title = "Financial Stress (%)") +
+  tm_layout(legend.outside = TRUE)
+
+# Combine maps
+tmap_arrange(map1, map2)
+
 
 ```
 
