@@ -1,7 +1,9 @@
 ---
-title: "Money Problems and Mental Health"
-author: "Adham Artimi (2676721), Daniel Mohammadpour (2749227), Nikki Borgen (2853132), Jip Allessie (2786323), Florian Hololtcheff
- (2790532), Raouf Dönmez (2870124), Adam Affara (2800635)"
+title: "Financial Strain and Mental Health"
+author: "Adham Artimi (2676721), Daniel Mohammadpour (2749227), Nikki Borgen (2853132),
+
+
+Jip Allessie (2786323), Florian Hololtcheff (2790532), Raouf Dönmez (2870124), Adam Affara (2800635)"
 date: "`r Sys.Date()`"
 output: pdf_document
 ---
@@ -16,7 +18,7 @@ install.packages("sf")
 install.packages("tinytex")
 ```
 
-```{r packages}
+```{r packages, warning = FALSE}
 require(tidyverse)
 require(rmarkdown)
 require(yaml)
@@ -59,7 +61,7 @@ We use two sets of data, zooming in specifically on the city of Amsterdam:
   
 Additionally, we use a combined dataset that includes both the 'moeite met rondkomen' (difficulty making ends meet) and 'Hoog risico op angst of depressie' (High risk of anxiety or depression) variables. This combined dataset was exported for four reference years (2012, 2016, 2020, and 2022) and split into three age categories: 18 years and older, 18 to 65 years, and 65 years and older. This results in a total of 12 data files. All files were downloaded from the shared group folder, in line with the assignment instructions.
 
-```{r loading_data}
+```{r loading_data, tidy = TRUE, warning = FALSE}
 
 # Load the datasets
 Gezondheid_per_wijk_en_buurt__2012_18_of_ouder <- read.csv2("https://raw.githubusercontent.com/Adhamartimi/ProgrammingForEcon-Tutorial-3-group-4/refs/heads/main/data/Gezondheid_per_wijk_en_buurt__2012_18_of_ouder.csv")
@@ -80,7 +82,7 @@ Gezondheid_per_wijk_en_buurt__2022_65_of_ouder <- read.csv2("https://raw.githubu
 
 We use datasets from the RIVM StatLine (Rijksinstituut voor Volksgezondheid en Milieu), which provide neighborhood-level statistics related to health and socioeconomic well-being in the Netherlands. Since all 12 datasets we use are identical in the number of observations and variables—differing only by year & age group—we provide a short summary of one representative dataset.
 
-```{r summary dataset(s)}
+```{r summary dataset(s), warning = FALSE}
 # Let's have a quick glance of the dataset using the glimpse (via dplyr) & head function
 glimpse(Gezondheid_per_wijk_en_buurt__2012_18_of_ouder)
 head(Gezondheid_per_wijk_en_buurt__2012_18_of_ouder)
@@ -92,7 +94,7 @@ This dataset contains 579 rows and 9 variables. Each row represents a specific n
 ## 2.3 Describe the type of variables included The variables in our 
 dataset represent both health-related and socioeconomic indicators:
 
-- The **Moeite met Rondkomen** variable reflects socioeconomic stress, measured by the percentage of individuals who report difficulty making ends meet.
+- The **Moeite met Rondkomen** variable reflects socioeconomic stress (SES), measured by the percentage of individuals who report difficulty making ends meet.
 
 - The **Hoog Risico op Angst of Depressie** variable reflects mental health vulnerability, measured by the percentage of individuals estimated to be at high risk for anxiety or depression.
 
@@ -115,16 +117,16 @@ These variables provide the structure and context necessary to filter and analyz
 
 ## 3.1 Data cleaning
 
-We cleaned each dataset by removing rows with missing area names or aggregate totals ("Nederland", "Gemeente: Amsterdam"). We then renamed columns to be more interpretable.
+We cleaned each dataset by removing unnecessary rows and rows with aggregate totals (such as "Gemeente: Amsterdam"). We then renamed columns to make them more interpretable. In step 5, we converted the SES and mental health variables to numeric format so they can be used in analysis. In step 6, we converted the Perioden variable to a date format to ensure consistent handling of time across datasets.
 
 ###Remove missing and aggregate rows
 
-```{r data_cleaning_step1: merge all the separate datasets}
+```{r data_cleaning_step1: merge all the separate datasets, warning = FALSE}
 
 amsterdam_gezondheid_merged <- rbind(Gezondheid_per_wijk_en_buurt__2012_18_of_ouder, Gezondheid_per_wijk_en_buurt__2012_18_tot_65, Gezondheid_per_wijk_en_buurt__2012_65_of_ouder, Gezondheid_per_wijk_en_buurt__2016_18_of_ouder, Gezondheid_per_wijk_en_buurt__2016_18_tot_65, Gezondheid_per_wijk_en_buurt__2016_65_of_ouder, Gezondheid_per_wijk_en_buurt__2020_18_of_ouder, Gezondheid_per_wijk_en_buurt__2020_18_tot_65, Gezondheid_per_wijk_en_buurt__2020_65_of_ouder, Gezondheid_per_wijk_en_buurt__2022_18_of_ouder, Gezondheid_per_wijk_en_buurt__2022_18_tot_65, Gezondheid_per_wijk_en_buurt__2022_65_of_ouder)
 ```
 
-```{r data_cleaning_step2: Filter out the unnecessary columns "Marges" & "Regioaanduiding.Gemeentenaam..naam."}
+```{r data_cleaning_step2: Filter out the unnecessary columns "Marges" & "Regioaanduiding.Gemeentenaam..naam.", warning = FALSE}
 
 amsterdam_gezondheid_clean <- amsterdam_gezondheid_merged |>
   select(-Marges) |>
@@ -132,13 +134,13 @@ amsterdam_gezondheid_clean <- amsterdam_gezondheid_merged |>
 
 ```
 
-```{r data_cleaning_step3: Filter out the rows with "Amsterdam"}
+```{r data_cleaning_step3: Filter out the rows with "Amsterdam", warning = FALSE}
 amsterdam_gezondheid <- amsterdam_gezondheid_clean |>
   filter(Wijken.en.buurten != "Amsterdam")
 
 ```
 
-```{r data_cleaning_step4: rename for clarity}
+```{r data_cleaning_step4: rename for clarity, warning = FALSE}
 
 amsterdam_gezondheid  <- amsterdam_gezondheid |>
   rename(
@@ -151,7 +153,7 @@ amsterdam_gezondheid  <- amsterdam_gezondheid |>
 
 ```
 
-```{r data_cleaning_step5: set variables as numeric} 
+```{r data_cleaning_step5: set variables as numeric, warning = FALSE} 
 
 amsterdam_gezondheid$risico_depressie = as.numeric(amsterdam_gezondheid$risico_depressie, na.rm = TRUE)
 
@@ -159,18 +161,17 @@ amsterdam_gezondheid$moeite_met_rondkomen = as.numeric(amsterdam_gezondheid$moei
 
 ```
 
-```{r data_cleaning_step6: set periode as year} 
+```{r data_cleaning_step6: set periode as year, warning = FALSE} 
 
 amsterdam_gezondheid$Perioden = ymd(amsterdam_gezondheid$Perioden, truncated = 2L)
 
 ```
 
-
 ## 3.2 Generate necessary variables
 
 Variable 1
 
-```{r gen_var1: Averages}
+```{r gen_var1: Averages, warning = FALSE}
 
 amsterdam_gezondheid <- amsterdam_gezondheid |>
   group_by(Perioden, Leeftijd) |>
@@ -183,7 +184,7 @@ amsterdam_gezondheid <- amsterdam_gezondheid |>
 
 Variable 2
 
-```{r gen_var2}
+```{r gen_var2: Percentiles, warning = FALSE}
 
 # First, calculate the percentiles (1–5) for "moeite met rondkomen" (financial stress). We assign each neighborhood to a quintile (1 = lowest stress, 5 = highest stress) and convert the numeric quintile into a descriptive label
 amsterdam_gezondheid <- amsterdam_gezondheid |>
@@ -200,7 +201,7 @@ amsterdam_gezondheid <- amsterdam_gezondheid |>
   )
 
 # We reepeat the same logic for "risico op depressie" (mental health complaints)
-amsterdam_gezondheid <- amsterdam_gezondheid %>%
+amsterdam_gezondheid <- amsterdam_gezondheid |>
   mutate(
     depressie_percentile = ntile(risico_depressie, 5),
     depressie_group = case_when(
@@ -213,31 +214,45 @@ amsterdam_gezondheid <- amsterdam_gezondheid %>%
     )
   )
 
-# Optional: View new groupings for first few rows (remove in final report)
-amsterdam_gezondheid %>%
+# Let's view the first few lines of the new groupings
+amsterdam_gezondheid |>
   select(wijken_en_buurten, moeite_met_rondkomen, rondkomen_group,
-         risico_depressie, depressie_group) %>%
+         risico_depressie, depressie_group) |>
   head(10)
 
 ```
 
-## 3.3 Visualize temporal variation
+Variable 3
 
-```{r visualise_temporal_variation}
+```{r gen_var3: Score differences, warning = FALSE}
 
-ggplot(amsterdam_gezondheid, aes(x = Perioden)) +
-  geom_line(aes(y = avg_risico_depressie, color = "Depressie"), size = 1) +
-  geom_line(aes(y = avg_moeite_rondkomen, color = "Rondkomen"), size = 1) +
-  facet_wrap(~Leeftijd) +
-  labs(title = "Ontwikkeling per leeftijdsgroep", x = "Jaar", y = "Gemiddelde score", color = "Variabele") +
-  theme_minimal() +
-  theme(axis.text.x = element_text(size = 6))
+amsterdam_gezondheid <- amsterdam_gezondheid |>
+  mutate(verschil_score = moeite_met_rondkomen - risico_depressie)
 
 ```
 
+
+## 3.3 Visualize temporal variation
+
+```{r visualise_temporal_variation, warning = FALSE}
+
+ggplot(amsterdam_gezondheid, aes(x = Perioden)) +
+  geom_line(aes(y = avg_risico_depressie, color = "Hoog risico op depressie"), size = 1) +
+  geom_line(aes(y = avg_moeite_rondkomen, color = "Moeite met rondkomen"), size = 1) +
+  facet_wrap(~Leeftijd) +
+  labs(title = "Ontwikkeling per leeftijdsgroep", x = "Jaar", y = "Percentage", color = "Variabele") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(size = 5))
+
+```
+
+The graph shows the development of two variables, financial strain and depression risk, across three age groups in Amsterdam from 2012 to 2022. Before 2020 we observe an counterintuitive trend; financial strain is in a declining trend across all age groups while depression risk is gradually rising.
+This suggests that despite improvements in the ability to make ends meet, psychological complaints continued to rise. This could be for various reasons; rising loneliness in cities, underlying mental health trends unrelated to income or rising loneliness could be among the possibilities. 
+From 2020 to 2022 this pattern breaks, financial strain and depression risk both spike in parallel, especially among working-age adults. This shift suggests that there is a stronger link between financial and mental health pressures during and after the pandemic. Unlike the previous trend, worsening economic conditions now coincide with the rise in mental health problems. The aftermath of this social and economic shock indicates a clear connection between material insecurity and mental well-being.
+
 ## 3.4 Visualize spatial variation
 
-```{r visualise_map}
+```{r visualise_map, warning = FALSE}
 
 # Load spatial data
 geo_data <- st_read("C:/Users/AdhamArtimi/OneDrive/Bureaublad/wijkenbuurten_2022_v3.gpkg", layer = "buurten")
@@ -266,14 +281,14 @@ tmap_mode("plot")
 map1 <- tm_shape(latest_year) +
   tm_polygons("risico_depressie",
               palette = "PuBuGn",
-              title = "Psych Complaints (%)") +
+              title = "High risk on depression (%)") +
   tm_layout(legend.outside = TRUE)
 
 # Map 2: Financial difficulty
 map2 <- tm_shape(latest_year) +
   tm_polygons("moeite_met_rondkomen",
               palette = "YlOrRd",
-              title = "Financial Stress (%)") +
+              title = "Financial Strain (%)") +
   tm_layout(legend.outside = TRUE)
 
 # Combine maps
@@ -282,47 +297,55 @@ tmap_arrange(map1, map2)
 
 ```
 
-Here you provide a description of why the plot above is relevant to your specific social problem.
+The map above offers a spatial visualisation of the correlation between the percentage of residents experiencing high risk of depression (left) and financial strain (right) at the neighbourhood level within Amsterdam. These two indicators reflect the central focus of our project: the relationship between income and mental health.
+
+The visual evidence supports previous findings from the literature (Marmot, 2005; Pickett & Wilkinson, 2015; Thomson et al., 2023), which suggest a strong link between socioeconomic status and psychological well-being. Neighbourhoods in the southern and southeastern parts of Amsterdam, which show elevated levels of financial strain (in darker red tones), also correspond to areas with a higher estimated risk of depression (in darker blue/green tones). Conversely, wealthier districts, especially in the city’s central and northern areas—show both lower financial strain and lower depression risk. This geographical overlap reinforces the relevance of our topic: income inequality is not evenly distributed within a city, and it may be a key driver of mental health disparities.
+
+While the plot strengthens our main argument; financial stress is linked to mental health problems, the strength of this link depends on neighbourhood level factors. By recognizing this, one moves away from possible policy solutions that cater to the entire city towards more targeted policies. The spread in the age groups magnifies these clear differences.
 
 ## 3.5 Visualize sub-population variation
 
 What is the poverty rate by state?
 
-```{r visualise_subpopulations}
+```{r visualise_subpopulations, warning = FALSE}
 
-ggplot(amsterdam_gezondheid, aes(x = Perioden, , y = risico_depressie, fill = Leeftijd)) +
-  geom_boxplot(aes(x = Perioden, y = risico_depressie, fill = Leeftijd))
-
-#df2 <- amsterdam_gezondheid |>
-#  pivot_longer(cols = c("risico_depressie", "moeite_met_rondkomen"), names_to = "Variabele", values_to = "waarden")
-
-#ggplot(df2, aes(x = as.numeric(Perioden), , y = waarden, fill = Variabele)) +
-#  geom_boxplot(aes(x = as.numeric(Perioden), y = waarden, fill = Variabele))
+ggplot(subset(amsterdam_gezondheid, format(Perioden, "%Y") =="2022"), aes(x = Leeftijd, y = verschil_score))+
+  geom_boxplot(fill = "lightblue", color = "darkblue") +
+  labs(
+    title = "Difference in score between Financial Strain and Depression Risk",
+    x = "Age Group",
+    y = "Difference in score",
+    caption = "Reference year: 2022"
+  ) +
+  theme_minimal() +
+  theme(plot.title = element_text(size = 12))
 
 ```
 
-Here you provide a description of why the plot above is relevant to your specific social problem.
+The boxplot shows the spread of the difference between financial strain and depression risk at the neighborhood level, across three age groups in Amsterdam. We plotted the following value: Difference = % experiencing financial difficulty - % depression risk
+
+The boxplot shows that there is a variation within each age group in how financial strain and mental health complaints align. The difference is positive in every age group on average, which means that financial stress percentages are higher than depression risk in general. The spread in the interquartile range shows that the difference varies widely between neighborhoods however.
 
 ## 3.6 Event analysis
 
-Analyze the relationship between two variables.
+In this section, we analyze the relationship between financial difficulty (rondkomen) and mental health problems (depressie) over time. We use ‘extra variable 1’ generated in part 3.1, that consists of the average financial stress across all age categories and the average risk of depression for each year. This way we are able to observe citywide trends in contrast to age-specific fluctuations. We are focusing specifically on the potential impact of the COVID crisis in 2020, as this specific point in time provides us with a critical event horizon that likely disrupted both economic and psychological conditions across Amsterdam.
+We expect that both financial stress and psychological complaints would increase following the COVID crisis, mainly due to job insecurity, social isolation and economic uncertainty. With our visualization of the trends before and after 2020, our goal is to look into whether this event correlates with a significant shift in our variables.
 
-```{r analysis}
+```{r analysis, warning = FALSE}
 
 ggplot(amsterdam_gezondheid, aes(x = Perioden)) +
   geom_line(aes(y = avg_risico_depressie,  color = "Depressie"), size = 1,) +
   geom_line(aes(y = avg_moeite_rondkomen, color = "Rondkomen"), size = 1) +
   geom_vline(aes(xintercept = as.Date("2020-03-01"), colour = "COVID-19"), linetype = "dashed") +
-  labs(title = "Event studie 'COVID-19 2020'", x = "Jaar", y = "Gemiddelde score", color = "Variabele") +
+  labs(title = "Event studie 'COVID-19 2020'", x = "Jaar", y = "Gemiddelde score", color = "Variabele", caption = "Source: Rijksoverheid") +
   theme_minimal() +
   theme(axis.text.x = element_text(size = 6)) +
   scale_color_manual(name = "Variabele",
                      values = c("Depressie" = "Darksalmon", "Rondkomen" = "Darkcyan", "COVID-19" = "Black"))
-
-# https://www.rijksoverheid.nl/onderwerpen/coronavirus-tijdlijn/maart-2020-maatregelen-tegen-verspreiding-coronavirus
 ```
 
-Here you provide a description of why the plot above is relevant to your specific social problem.
+The plot above confirms our expectations. By relying on our generated ‘extra variable 1’ wee are able to observe a clear post-COVID increase in both financial difficulty and depression, Between 2020 and 2022 the average percentage of people who suffered severe mental health problems rises sharply and so does the average percentage of people who face financial strain.
+The timing of the increase, it coincides with the pandemic, suggests that external shock can magnify underlying social problems, especially for already vulnerable groups.
 
 # Part 4 - Discussion
 
@@ -346,10 +369,14 @@ Provide the link to your PUBLIC repository here: https://github.com/Adhamartimi/
 ## 5.2 Reference list
 
 Literature: 
-Igelström, E., Katikireddi, S. V., Leyland, A., McCartney G., Purba, A. K, Reeves, A., Shimonovich, M., Thomson, H., & Thomson, R. M. (2023). How do income changes impact on mental health and wellbeing for working-age adults? A systematic review and meta-analysis. https://pmc.ncbi.nlm.nih.gov/articles/PMC7614874/#R4 
+Igelström, E., Katikireddi, S. V., Leyland, A., McCartney G., Purba, A. K, Reeves, A., Shimonovich, M., Thomson, H., & Thomson, R. M. (2023). How do income changes impact on mental health and wellbeing for working-age adults? A systematic review and meta-analysis. [PMC Article]. https://pmc.ncbi.nlm.nih.gov/articles/PMC7614874/#R4 
 
-Marmot, M. (2005): Social determinants of health inequalities. The Lancet. https://www.sciencedirect.com/science/article/pii/S0140673605711466?via%3Dihub 
+Marmot, M. (2005). Social determinants of health inequalities. The Lancet, 365(9464), 1099-1104. https://www.sciencedirect.com/science/article/pii/S0140673605711466?via%3Dihub 
 
-World Health Organization. (2025). Mental Health. https://www.who.int/health-topics/mental-health#tab=tab_2
+World Health Organization. (2025). Mental Health. https://www.who.int/health-topics/mental-health#tab=tab_2 
 
-Pickett, K. E., & Wilkinson, R. G. (2001). Income inequality and health: A casual review. Social Science & Medicine. https://www.sciencedirect.com/science/article/pii/S0277953614008399?via%3Dihub
+Pickett, K. E., & Wilkinson, R. G. (2015). Income inequality and health: A casual review. Social Science & Medicine, 128, 316-326. https://www.sciencedirect.com/science/article/pii/S0277953614008399?via%3Dihub 
+
+Rijksinstituut Volkgezondheid en Milieu (RVIM). (2023). Gezondheid per wijk en buurt; 2012/2016/2020/2022(indeling 2022). https://statline.rivm.nl/#/RIVM/nl/dataset/50120NED/table?ts=1750789988327 
+
+Rijksoverheid. (2020). Ontwikkelingen coronavirus in 2020. https://www.rijksoverheid.nl/onderwerpen/coronavirus-tijdlijn/2020
