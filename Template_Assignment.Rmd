@@ -30,7 +30,7 @@ library(tinytex)
 
 # Money Problems and Mental Health
 
-Adham Artimi (2676721), Daniel Mohammadpour (2749227), Nikki Borgen (2853132), Jip Allessie (2786323), Student 5 (0123456), Student 6 (0123456), Student 7 (0123456)
+Adham Artimi (2676721), Daniel Mohammadpour (2749227), Nikki Borgen (2853132), Jip Allessie (2786323), Student 5 (0123456), Florian Hololtcheff (2790532), Raouf Dönmez (2870124), Adam Affara (2800635)
 
 Tutorial 3; Chantal Schouwenaar
 
